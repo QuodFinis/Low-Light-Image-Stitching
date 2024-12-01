@@ -19,6 +19,7 @@ imageB = imutils.resize(imageB, width=400)
 # stitch the images together to create a panorama
 stitcher = Stitcher()
 (result, vis) = stitcher.stitch([imageA, imageB], showMatches=True)
+cv2.imwrite("output.jpg", result)
 
 # show the images
 cv2.imshow("Image A", imageA)
@@ -26,3 +27,6 @@ cv2.imshow("Image B", imageB)
 cv2.imshow("Keypoint Matches", vis)
 cv2.imshow("Result", result)
 cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# python stitch.py --first WTC_505pm.jpg --second JCHR_505pm.jpg
