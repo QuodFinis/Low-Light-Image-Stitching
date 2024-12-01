@@ -3,6 +3,17 @@ import numpy as np
 
 
 class Stitcher:
+    def __init__(self, preprocesser=None):
+        """
+        Initializes the stitcher with an optional preprocessor to apply to the images before stitching.
+
+        :param preprocesser:
+            Preprocessor to apply to the images before stitching
+        """
+        # store the image preprocessor
+        self.preprocesser = preprocesser
+
+
     def stitch(self, images: list[str], ratio=0.75, reprojThresh=4.0, showMatches=False):
         """
         Stitches two images together by detecting keypoints and extracting local invariant descriptors from them. Matches features between the two images, applies a perspective warp to stitch the images together, and returns the stitched image.
