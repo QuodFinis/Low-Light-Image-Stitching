@@ -193,3 +193,17 @@ class Stitcher:
         grayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
         grayStitched = cv2.cvtColor(stitched_image, cv2.COLOR_BGR2GRAY)
         (ssim, _) = cv2.quality.QualitySSIM_compute(grayA, grayStitched)
+
+        # PSNR
+        psnr = cv2.PSNR(imageA, stitched_image)
+
+        # Compile metrics
+        metrics = {
+            "num_matches": num_matches,
+            "num_inliers": num_inliers,
+            "matching_ratio": matching_ratio,
+            "compactness": compactness,
+            "esi": esi,
+            "ssim": ssim[0] if len(ssim) > 0 else 0,
+            "psnr": psnr,
+        }
