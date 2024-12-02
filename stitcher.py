@@ -170,3 +170,26 @@ class Stitcher:
         # return the visualization
         return vis
 
+    def metrics(self, matches, status, imageA, kpsA, imageB, stitched_image):
+        # Metrics computation
+        num_matches = len(matches)
+        num_inliers = np.sum(status)
+        matching_ratio = num_inliers / num_matches if num_matches > 0 else 0
+
+        # Compactness: Percentage of the image covered by keypoints
+        keypoint_areas = np.zeros(imageA.shape[:2], dtype=np.uint8)
+        for kp in kpsA:
+            x, y = int(kp[0]), int(kp[1])
+            cv2.rectangle(keypoint_areas, (x - 1, y - 1), (x + 1, y + 1), 1, -1)
+        compactness = np.sum(keypoint_areas) / (imageA.shape[0] * imageA.shape[1])
+
+        # Edge Similarity Index (ESI)
+        edgesA = cv2.Canny(cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY), 100, 200)
+        edgesB = cv2.Canny(cv2.cvtColor(imageB, cv2.COLOR_BGR2GRAY), 100, 200)
+        edges_stitched = cv2.Canny(cv2.cvtColor(stitched_image, cv2.COLOR_BGR2GRAY), 100, 200)
+        esi = cv2.matchTemplate(edges_stitched, edgesA, cv2.TM_CCOEFF_NORMED).max()
+
+        # Structural Similarity Index (SSIM)
+        grayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
+        grayStitched = cv2.cvtColor(stitched_image, cv2.COLOR_BGR2GRAY)
+        (ssim, _) = cv2.quality.QualitySSIM_compute(grayA, grayStitched)
