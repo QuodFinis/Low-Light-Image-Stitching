@@ -5,7 +5,7 @@ from preprocesser import Preprocesser
 
 
 class Stitcher:
-    def __init__(self, preprocessor: Preprocesser = None, ratio=0.75, reprojThresh=4.0, blending_factor=0.5, showMatches=False):
+    def __init__(self, preprocessor: Preprocesser = None):
         """
         Initializes the stitcher with an optional preprocessor to apply to the images before stitching.
 
