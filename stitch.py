@@ -1,32 +1,43 @@
 import cv2
-import imutils
 import argparse
-from stitcher import Stitcher
+from imutils import paths
 
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-f", "--first", required=True, help="path to the first image")
-ap.add_argument("-s", "--second", required=True, help="path to the second image")
+ap.add_argument("-i", "--images", type=str, required=True, help="path to input directory of images to stitch")
+ap.add_argument("-o", "--output", type=str, required=True, help="path to output image")
 args = vars(ap.parse_args())
 
-# load the two images and resize them to have a width of 400 pixels (for faster processing)
-imageA = cv2.imread(args["first"])
-imageB = cv2.imread(args["second"])
-imageA = imutils.resize(imageA, width=400)
-imageB = imutils.resize(imageB, width=400)
+print("[INFO] loading images...")
+imagePaths = sorted(list(paths.list_images(args["images"])))
+images = []
 
-# stitch the images together to create a panorama
-stitcher = Stitcher()
-(result, vis) = stitcher.stitch([imageA, imageB], showMatches=True)
-cv2.imwrite("output.jpg", result)
+# loop over the image paths, load each one, and add them to our images to stitch list
+for imagePath in imagePaths:
+    image = cv2.imread(imagePath)
+    images.append(image)
 
-# show the images
-cv2.imshow("Image A", imageA)
-cv2.imshow("Image B", imageB)
-cv2.imshow("Keypoint Matches", vis)
-cv2.imshow("Result", result)
-cv2.waitKey(0)
+# initialize OpenCV's image stitcher object and then perform the image stitching
+print("[INFO] stitching images...")
+stitcher = cv2.Stitcher.create()
+(status, stitched) = stitcher.stitch(images)
+
+# if the status is '0', then OpenCV successfully performed image stitching
+if status == 0:
+    # write the output stitched image to disk
+    cv2.imwrite(args["output"], stitched)
+
+    # display the output stitched image to our screen
+    cv2.imshow("Stitched", stitched)
+    cv2.waitKey(0)
+
+# otherwise the stitching failed, likely due to not enough keypoints being detected
+else:
+    print("[INFO] image stitching failed ({})".format(status))
+
+# close all windows
 cv2.destroyAllWindows()
 
-# python stitch.py --first WTC_505pm.jpg --second JCHR_505pm.jpg
+# example
+# python stitch.py --images "lower manhattan" --output "lower manhattan/output.png"
